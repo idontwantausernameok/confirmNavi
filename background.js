@@ -2,6 +2,16 @@
 const extId = "confirmNavi";	
 const temporary = browser.runtime.id.endsWith('@temporary-addon'); // debugging?
 
+/* buttons currently not supporterd on firefox 87.x
+var buttons = [
+  {
+    "title": "Confirm"
+  }, {
+    "title": "Reject"
+  }
+];
+*/
+
 function log(level, msg) {
 	level = level.trim().toLowerCase();
 	if (['error','warn'].includes(level)
@@ -23,14 +33,15 @@ async function onBeforeRequest(details) {
 	if(confirmTabs.has(details.tabId) ){
 		log('debug', details.url);
 		if( typeof exception === 'undefined') {
-			browser.pageAction.setTitle({tabId: details.tabId, title: details.url});
+			browser.pageAction.setTitle({tabId: details.tabId, title: 'Continue Navigation to ' + details.url});
 			browser.pageAction.show(details.tabId);
 			dataStore = {url: details.url, tabId: details.tabId};
-			browser.notifications.create(extId, {
+			browser.notifications.create(extId + details.url, {
 				"type": "basic",
 				"iconUrl": browser.runtime.getURL("icon.png"),
 				"title": 'Stopped Navigation', 
 				"message":  'to ' + details.url + "\nTo continue with the navigation, click on the pageAction icon."
+				//,"buttons": buttons
 			});
 			return {cancel: true};
 		}else{
@@ -49,7 +60,7 @@ browser.webRequest.onBeforeRequest.addListener(
 );
 
 function onRemoved(tabId, removeInfo) {
-	confirmTabs.delete(tabid);
+	confirmTabs.delete(tabId);
 	exception = undefined;
 }
 
@@ -73,3 +84,10 @@ browser.pageAction.onClicked.addListener(async (tab) => {
  await  browser.tabs.update({url: dataStore.url});
 });
 
+
+/*
+browser.notifications.onButtonClicked.addListener((id, index) => {
+  browser.notifications.clear(id);
+  console.log("You chose: " + buttons[index].title);
+});
+*/
