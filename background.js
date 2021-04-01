@@ -19,18 +19,26 @@ let exception = undefined;
 let dataStore;
 
 async function onBeforeRequest(details) {
+	//if(details.frameId === 0){
 	if(confirmTabs.has(details.tabId) ){
 		log('debug', details.url);
 		if( typeof exception === 'undefined') {
+			browser.pageAction.setTitle({tabId: details.tabId, title: details.url});
 			browser.pageAction.show(details.tabId);
 			dataStore = {url: details.url, tabId: details.tabId};
-			//return;
+			browser.notifications.create(extId, {
+				"type": "basic",
+				"iconUrl": browser.runtime.getURL("icon.png"),
+				"title": 'Stopped Navigation', 
+				"message":  'to ' + details.url + "\nTo continue with the navigation, click on the pageAction icon."
+			});
 			return {cancel: true};
 		}else{
 			log('debug', "no exception for tab:" + details.tabId + " url:" + details.url);
 			exception = undefined;
 		}
 	}
+	//}
 
 }
 

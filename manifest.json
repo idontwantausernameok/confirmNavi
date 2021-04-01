@@ -19,10 +19,11 @@
     "default_icon": "icon.png"
   },
   "permissions": [
+	  "notifications",
     "tabs",
     "webRequest",
     "webRequestBlocking",
     "<all_urls>"
   ],
-  "version": "0.1.0"
+  "version": "0.2.0"
 }
